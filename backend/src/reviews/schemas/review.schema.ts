@@ -1,19 +1,22 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class Review extends Document {
-  @Prop({ required: true })
-  employeeId: string;
+  @Prop({ required: true, trim: true })
+  title: string;
 
-  @Prop({ required: true })
-  reviewerId: string;
+  @Prop({ required: true, trim: true })
+  description: string;
 
-  @Prop({ default: '' })
-  feedback: string;
+  @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
+  targetEmployee: Types.ObjectId;
 
-  @Prop({ required: true, enum: ['pending', 'completed'], default: 'pending' })
-  status: string;
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Employee' }] })
+  participants: Types.ObjectId[];
+
+  @Prop({ type: Types.ObjectId, ref: 'Feedback' })
+  feedbacks: Types.ObjectId[];
 }
 
 export const ReviewSchema = SchemaFactory.createForClass(Review);
