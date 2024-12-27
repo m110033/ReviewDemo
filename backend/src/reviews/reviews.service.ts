@@ -60,6 +60,16 @@ export class ReviewsService {
   async findAllForEmployee(id: string): Promise<Review[]> {
     const items = await this.reviewModel
       .find({ participants: { $in: [id] } })
+      .populate([
+        {
+          path: 'participants',
+          select: 'username',
+        },
+        {
+          path: 'targetEmployee',
+          select: 'username',
+        }
+      ])
       .select('title description targetEmployee participants')
       .lean()
       .exec();
