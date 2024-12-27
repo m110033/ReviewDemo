@@ -51,15 +51,13 @@ export class ReviewsService {
   async findAllForAdmin(): Promise<Review[]> {
     const items = await this.reviewModel
       .find()
-      .select('title description targetEmployee participants')
-      .lean()
-      .exec();
+      .select('title description targetEmployee participants');
     return items as Review[];
   }
 
   async findAllForEmployee(id: string): Promise<Review[]> {
     const items = await this.reviewModel
-      .find({ participants: { $in: [id] } })
+      .find({ participants: { $in: [new Types.ObjectId(id)] } })
       .populate([
         {
           path: 'participants',
@@ -68,20 +66,20 @@ export class ReviewsService {
         {
           path: 'targetEmployee',
           select: 'username',
+        },
+        {
+          path: 'feedbacks',
+          select: 'reviewId participant content',
         }
       ])
-      .select('title description targetEmployee participants')
-      .lean()
-      .exec();
+      .select('title description targetEmployee participants feedbacks');
     return items as Review[];
   }
 
   async findOne(id: string): Promise<Review> {
     const item = await this.reviewModel
       .findById(id)
-      .select('title description targetEmployee participants')
-      .lean()
-      .exec();
+      .select('title description targetEmployee participants');
     return item as Review;
   }
 

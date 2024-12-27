@@ -1,13 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import * as mongoose from 'mongoose';
+import { Employees } from 'src/employees/schemas/employee.schema';
+import { Review } from 'src/reviews/schemas/review.schema';
 
 @Schema({ timestamps: true, autoIndex: true })
-export class Feedback extends Document {
-  @Prop({ type: Types.ObjectId, ref: 'Review', required: true })
-  reviewId: Types.ObjectId;
+export class Feedback extends mongoose.Document {
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Review', required: true })
+  reviewId: Review;
 
-  @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
-  participant: Types.ObjectId;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Employees', required: true })
+  participant: Employees;
 
   @Prop({ required: true, trim: true })
   content: string;

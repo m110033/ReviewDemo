@@ -1,24 +1,33 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Feedback } from './schemas/feedback.schema';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
+import { ReviewsService } from 'src/reviews/reviews.service';
 
 @Injectable()
 export class FeedbackService {
   constructor(
     @InjectModel(Feedback.name) private readonly feedbackModel: Model<Feedback>,
+    private readonly reviewsService: ReviewsService,
   ) {}
 
   async create(
     createFeedbackDto: CreateFeedbackDto,
     participant: string,
   ): Promise<Feedback> {
+    const review = await this.reviewsService.findOne(createFeedbackDto.reviewId);
     const feedback = new this.feedbackModel({
-      ...createFeedbackDto,
+      reviewId: new Types.ObjectId(createFeedbackDto.reviewId),
+      content: createFeedbackDto.content,
       participant,
     });
+    if (typeof review.feedbacks === 'undefined') {
+      review.feedbacks = [];
+    }
+    review.feedbacks.push(feedback);
+    review.save();
     return feedback.save();
   }
 

@@ -4,10 +4,11 @@ import { ReviewSchema } from './schemas/review.schema';
 import { ReviewsService } from './reviews.service';
 import { ReviewsController } from './reviews.controller';
 import { EmployeesModule } from 'src/employees/employees.module';
+import { EmployeeSchema } from 'src/employees/schemas/employee.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'Review', schema: ReviewSchema }]),
+    MongooseModule.forFeature([{ name: 'Review', schema: ReviewSchema }, { name: 'Employees', schema: EmployeeSchema }]),
     EmployeesModule,
   ],
   providers: [ReviewsService],

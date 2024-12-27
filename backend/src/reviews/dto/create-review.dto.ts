@@ -1,11 +1,11 @@
 import {
   IsString,
   IsNotEmpty,
-  IsMongoId,
   IsArray,
   IsOptional,
 } from 'class-validator';
-import { Types } from 'mongoose';
+import * as mongoose from 'mongoose';
+import { ObjectIdTransformer } from 'src/common/transformers/object-id.transformer';
 
 export class CreateReviewDto {
   @IsString()
@@ -16,12 +16,12 @@ export class CreateReviewDto {
   @IsNotEmpty()
   description: string; // Description of the review
 
-  @IsMongoId()
   @IsNotEmpty()
-  targetEmployee: Types.ObjectId; // The ID of the employee being reviewed
+  @ObjectIdTransformer()
+  targetEmployee: mongoose.Types.ObjectId; // The ID of the employee being reviewed
 
   @IsArray()
   @IsOptional()
-  @IsMongoId({ each: true })
-  participants?: Types.ObjectId[]; // Optional: Array of IDs of participants for the review
+  @ObjectIdTransformer()
+  participants?: mongoose.Types.ObjectId[]; // Optional: Array of IDs of participants for the review
 }
