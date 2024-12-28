@@ -17,28 +17,35 @@ import { EmployeeRoleEnum } from './enums/role.enum';
 import { ValidationException } from 'src/common/exceptions/validation.exception';
 import { ErrorCode } from 'src/common/enums/error-code.enum';
 import { Types } from 'mongoose';
+import { EmployeeObject } from 'src/common/decorators/employee.decorator';
+import { Employees } from './schemas/employee.schema';
 
 @Controller('employees')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class EmployeesController {
-  constructor(private readonly EmployeesService: EmployeesService) {}
+  constructor(private readonly employeesService: EmployeesService) {}
 
   @Post()
   @Roles(EmployeeRoleEnum.ADMIN)
   async create(@Body() CreateEmployeeDto: CreateEmployeeDto) {
-    return await this.EmployeesService.create(CreateEmployeeDto);
+    return await this.employeesService.create(CreateEmployeeDto);
   }
 
   @Get()
   @Roles(EmployeeRoleEnum.ADMIN, EmployeeRoleEnum.EMPLOYEE)
-  async find() {
-    return await this.EmployeesService.findAll();
+  async find(@EmployeeObject() employee: Employees) {
+    if (employee.role === EmployeeRoleEnum.ADMIN) {
+      return await this.employeesService.findAll();
+    } else {
+      const object = await this.employeesService.findOneByEmail(employee.email);
+      return [object];
+    }
   }
 
   @Get(':id')
   @Roles(EmployeeRoleEnum.ADMIN, EmployeeRoleEnum.EMPLOYEE)
   async findOnee(@Param('id') id: string) {
-    const object = await this.EmployeesService.findOne(new Types.ObjectId(id));
+    const object = await this.employeesService.findOne(new Types.ObjectId(id));
     if (!object) {
       throw new ValidationException({
         message: 'Employee not found',
@@ -54,12 +61,12 @@ export class EmployeesController {
     @Param('id') id: string,
     @Body() UpdateEmployeeDto: Partial<CreateEmployeeDto>,
   ) {
-    return await this.EmployeesService.update(id, UpdateEmployeeDto);
+    return await this.employeesService.update(id, UpdateEmployeeDto);
   }
 
   @Delete(':id')
   @Roles(EmployeeRoleEnum.ADMIN)
   async delete(@Param('id') id: string) {
-    return this.EmployeesService.remove(id);
+    return this.employeesService.remove(id);
   }
 }

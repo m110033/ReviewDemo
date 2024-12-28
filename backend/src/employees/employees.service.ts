@@ -5,6 +5,7 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { Employees } from './schemas/employee.schema';
 import * as bcrypt from 'bcrypt';
+import { EmployeeRoleEnum } from './enums/role.enum';
 
 @Injectable()
 export class EmployeesService {
@@ -45,6 +46,14 @@ export class EmployeesService {
   async findAll(): Promise<Employees[]> {
     return (await this.employeeModel
       .find()
+      .select('email username password role')
+      .lean()
+      .exec()) as Employees[];
+  }
+
+  async findPartial(role: EmployeeRoleEnum): Promise<Employees[]> {
+    return (await this.employeeModel
+      .find({ role })
       .select('email username password role')
       .lean()
       .exec()) as Employees[];

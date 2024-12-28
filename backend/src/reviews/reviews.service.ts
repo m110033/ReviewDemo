@@ -55,9 +55,9 @@ export class ReviewsService {
     return items as Review[];
   }
 
-  async findAllForEmployee(id: string): Promise<Review[]> {
+  async findAllForEmployee(id: Types.ObjectId): Promise<Review[]> {
     const items = await this.reviewModel
-      .find({ participants: { $in: [new Types.ObjectId(id)] } })
+      .find({ participants: { $in: [id] } })
       .populate([
         {
           path: 'participants',
@@ -70,7 +70,7 @@ export class ReviewsService {
         {
           path: 'feedbacks',
           select: 'reviewId participant content',
-        }
+        },
       ])
       .select('title description targetEmployee participants feedbacks');
     return items as Review[];

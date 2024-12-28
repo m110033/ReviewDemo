@@ -21,6 +21,7 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Employees } from 'src/employees/schemas/employee.schema';
 import { EmployeeObject } from 'src/common/decorators/employee.decorator';
+import { Types } from 'mongoose';
 
 @Controller('feedbacks')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -47,10 +48,7 @@ export class FeedbackController {
 
     const object = await this.employeesService.findOneByEmail(employee.email);
 
-    const feedback = await this.feedbackService.create(
-      dto,
-      object._id.toString(),
-    );
+    const feedback = await this.feedbackService.create(dto, object.id);
 
     return feedback;
   }
@@ -59,7 +57,9 @@ export class FeedbackController {
   @Roles(EmployeeRoleEnum.ADMIN, EmployeeRoleEnum.EMPLOYEE)
   async findAll(@EmployeeObject() employee: Employees) {
     const object = await this.employeesService.findOneByEmail(employee.email);
-    const feedbacks = await this.feedbackService.findAll(object._id.toString());
+    const feedbacks = await this.feedbackService.findAll(
+      object._id as Types.ObjectId,
+    );
     return feedbacks;
   }
 

@@ -14,13 +14,13 @@ export class FeedbackService {
   ) {}
 
   async create(
-    createFeedbackDto: CreateFeedbackDto,
-    participant: string,
+    dto: CreateFeedbackDto,
+    participant: Types.ObjectId,
   ): Promise<Feedback> {
-    const review = await this.reviewsService.findOne(createFeedbackDto.reviewId);
+    const review = await this.reviewsService.findOne(dto.reviewId);
     const feedback = new this.feedbackModel({
-      reviewId: new Types.ObjectId(createFeedbackDto.reviewId),
-      content: createFeedbackDto.content,
+      reviewId: dto.reviewId,
+      content: dto.content,
       participant,
     });
     if (typeof review.feedbacks === 'undefined') {
@@ -31,7 +31,7 @@ export class FeedbackService {
     return feedback.save();
   }
 
-  async findAll(participant: string): Promise<Feedback[]> {
+  async findAll(participant: Types.ObjectId): Promise<Feedback[]> {
     const items = await this.feedbackModel
       .find({ participant })
       .select('reviewId participant content')

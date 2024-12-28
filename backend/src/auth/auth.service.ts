@@ -29,4 +29,9 @@ export class AuthService {
     };
     return { access_token: this.jwtService.sign(payload) };
   }
+
+  async getInfo(email: string) {
+    const employee = await this.EmployeesService.findOneByEmail(email);
+    return employee;
+  }
 }

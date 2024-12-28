@@ -18,6 +18,7 @@ import { Employees } from 'src/employees/schemas/employee.schema';
 import { EmployeesService } from 'src/employees/employees.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Types } from 'mongoose';
 
 @Controller('reviews')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -36,16 +37,22 @@ export class ReviewsController {
   // Admin fetches all reviews (management view)
   @Get('/admin')
   @Roles(EmployeeRoleEnum.ADMIN)
-  findAllForAdmin() {
-    return this.reviewsService.findAllForAdmin();
+  async findAllForAdmin() {
+    return await this.reviewsService.findAllForAdmin();
   }
 
   // Employee fetches reviews requiring feedback
   @Get()
   @Roles(EmployeeRoleEnum.ADMIN, EmployeeRoleEnum.EMPLOYEE)
   async findAllForEmployee(@EmployeeObject() employee: Employees) {
-    const object = await this.employeesService.findOneByEmail(employee.email);
-    return this.reviewsService.findAllForEmployee(object._id.toString());
+    if (employee.role === EmployeeRoleEnum.ADMIN) {
+      return await this.reviewsService.findAllForAdmin();
+    } else {
+      const object = await this.employeesService.findOneByEmail(employee.email);
+      return await this.reviewsService.findAllForEmployee(
+        object._id as Types.ObjectId,
+      );
+    }
   }
 
   @Get(':id')

@@ -1,10 +1,16 @@
 'use client';
 
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getEmployees, deleteEmployee, checkAndRefreshToken, Employee } from "../api";
+import { useRouter } from "next/navigation";
 
-const TableEmployees: React.FC = () => {
+const CreateEmployeePage: React.FC = () => {
+  const router = useRouter();
+
   const [employees, setEmployees] = useState<Employee[]>([]);
+
+  const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -21,10 +27,11 @@ const TableEmployees: React.FC = () => {
   }, []);
 
   // Delete employee
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string | undefined) => {
+    if (!id) return;
     try {
       await deleteEmployee(id);
-      setEmployees((prev) => prev.filter((employee) => employee._id !== id));
+      setEmployees((prev) => prev.filter((employee) =>employee._id !== id));
     } catch (error) {
       console.error("Error deleting employee:", error);
     }
@@ -32,6 +39,16 @@ const TableEmployees: React.FC = () => {
 
   return (
     <div className="rounded-sm border border-stroke bg-white px-5 pb-2.5 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+      {userInfo.role === "admin" && (
+        <div className="flex justify-end py-2">
+        <Link
+          href="/employees/create"
+          className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-2 text-center font-medium text-white hover:bg-opacity-90 lg:px-6 xl:px-6"
+        >
+          Create
+        </Link>
+      </div>
+      )}
       <div className="max-w-full overflow-x-auto">
         <table className="w-full table-auto">
           <thead>
@@ -65,17 +82,19 @@ const TableEmployees: React.FC = () => {
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <div className="flex items-center space-x-3.5">
                     <button
-                      onClick={() => alert(`Edit employee: ${employee._id}`)}
+                    onClick={() => router.push(`/employees/update?id=${employee._id}`)}
                       className="hover:text-primary"
                     >
                       Edit
                     </button>
-                    <button
-                      onClick={() => handleDelete(employee._id)}
-                      className="hover:text-primary"
-                    >
-                      Delete
-                    </button>
+                    {userInfo.role === "admin" && userInfo.email !== employee.email && (
+                      <button
+                        onClick={() => handleDelete(employee._id)}
+                        className="hover:text-primary"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -87,4 +106,4 @@ const TableEmployees: React.FC = () => {
   );
 };
 
-export default TableEmployees;
+export default CreateEmployeePage;

@@ -1,9 +1,4 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsArray,
-  IsOptional,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, IsOptional } from 'class-validator';
 import * as mongoose from 'mongoose';
 import { ObjectIdTransformer } from 'src/common/transformers/object-id.transformer';
 

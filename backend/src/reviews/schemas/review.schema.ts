@@ -11,7 +11,11 @@ export class Review extends mongoose.Document {
   @Prop({ required: true, trim: true })
   description: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Employees', required: true })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employees',
+    required: true,
+  })
   targetEmployee: Employees;
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Employees' }] })

@@ -10,10 +10,10 @@ export const metadata: Metadata = {
     description: "Design a web application that allows employees to submit feedback toward each other's performance review.",
   };
 
-const TablesPage = () => {
+const ReviewPage = () => {
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Tables" />
+      <Breadcrumb pageName="Review" />
       <div className="flex flex-col gap-10">
         <TableReviews />
       </div>
@@ -21,4 +21,4 @@ const TablesPage = () => {
   );
 };
 
-export default TablesPage;
+export default ReviewPage;

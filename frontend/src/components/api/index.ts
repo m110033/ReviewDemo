@@ -5,19 +5,33 @@ interface LoginResponse {
 }
 
 export interface Employee {
-  _id: number;
+  _id: string;
   email: string;
   username: string;
+  password: string;
+  role: string;
+}
+
+export interface CreateEmployee {
+  email: string;
+  username: string;
+  password: string;
   role: string;
 }
 
 export interface Review {
-  _id: number;
-  username: string;
+  _id?: string;
   title: string;
   description: string;
   targetEmployee: { _id: string; username: string };
   participants: { _id: string; username: string }[];
+}
+
+export interface CreateReview {
+  title: string;
+  description: string;
+  targetEmployee: string;
+  participants: string[];
 }
 
 // Axios configuration
@@ -72,6 +86,42 @@ export const checkAndRefreshToken = async (): Promise<void> => {
   window.location.href = "/"; // Redirect to homepage
 };
 
+// Get information
+export const getInfo = async (): Promise<Employee> => {
+  try {
+    await checkAndRefreshToken();
+    const response = await axios.get<Employee>("/auth/info");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching info:", error);
+    throw error;
+  }
+};
+
+// create an employee
+export const createEmployee = async (params: CreateEmployee): Promise<Employee> => {
+  try {
+    await checkAndRefreshToken();
+    const response = await axios.post<Employee>("/employees", params);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching employees:", error);
+    throw error;
+  }
+};
+
+// Fetch employees information
+export const getEmployee = async (id: string): Promise<Employee> => {
+  try {
+    await checkAndRefreshToken();
+    const response = await axios.get<Employee>(`/employees/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching employees:", error);
+    throw error;
+  }
+};
+
 // Fetch all employees
 export const getEmployees = async (): Promise<Employee[]> => {
   try {
@@ -85,12 +135,35 @@ export const getEmployees = async (): Promise<Employee[]> => {
 };
 
 // Delete an employee
-export const deleteEmployee = async (id: number): Promise<void> => {
+export const deleteEmployee = async (id: string): Promise<void> => {
   try {
     await checkAndRefreshToken();
     await axios.delete(`/employees/${id}`);
   } catch (error) {
     console.error(`Error deleting employee with id ${id}:`, error);
+    throw error;
+  }
+};
+
+// Update an employee
+export const updateEmployee = async (id: string, params: Partial<Employee>): Promise<Employee> => {
+  try {
+    await checkAndRefreshToken();
+    const response = await axios.patch<Employee>(`/employees/${id}`, params);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating employee with id ${id}:`, error);
+    throw error;
+  }
+};
+
+export const createReview = async (params: CreateReview): Promise<Review> => {
+  try {
+    await checkAndRefreshToken();
+    const response = await axios.post<Review>("/reviews", params);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating review:", error);
     throw error;
   }
 };
@@ -108,7 +181,7 @@ export const getReviews = async (): Promise<Review[]> => {
 };
 
 // Delete a review
-export const deleteReview = async (id: number): Promise<void> => {
+export const deleteReview = async (id: string): Promise<void> => {
   try {
     await checkAndRefreshToken();
     await axios.delete(`/reviews/${id}`);

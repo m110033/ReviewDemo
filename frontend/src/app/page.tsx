@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/components/api";
+import { getInfo, login } from "@/components/api";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -18,6 +18,8 @@ const LoginPage: React.FC = () => {
       // Call login API
       await login(email, password);
       // Redirect to /employee upon successful login
+      const userInfo = await getInfo();
+      localStorage.setItem("userInfo", JSON.stringify(userInfo));
       router.push("/employees");
     } catch (err) {
       console.error("Login failed:", err);
