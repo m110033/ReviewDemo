@@ -55,6 +55,8 @@ const port = process.env.PORT || '4000';
 
 const apiUrl = process.env.API_URL || `http://localhost:${port}`;
 
+console.log(`API URL: ${process.env.API_URL}`);
+
 // Axios configuration
 axios.defaults.baseURL = `${apiUrl}/api/v1`;
 let accessToken: string | null = null;
