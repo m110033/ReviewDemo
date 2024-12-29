@@ -51,8 +51,12 @@ export interface CreateFeedback {
   content: string;
 }
 
+const port = process.env.PORT || '4000';
+
+const apiUrl = process.env.API_URL || `http://localhost:${port}`;
+
 // Axios configuration
-axios.defaults.baseURL = `${process.env.API_URL}/api/v1`;
+axios.defaults.baseURL = `${apiUrl}/api/v1`;
 let accessToken: string | null = null;
 
 const setAccessToken = (token: string) => {
