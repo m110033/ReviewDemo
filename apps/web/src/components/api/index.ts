@@ -53,7 +53,7 @@ export interface CreateFeedback {
 
 const port = process.env.PORT || '4000';
 
-const apiUrl = process.env.API_URL || `https://cirrusassignment.railway.internal:${port}`;
+const apiUrl = process.env.API_URL || `http://cirrusassignment.railway.internal:${port}`;
 
 console.log(`API URL: ${process.env.API_URL}`);
 
