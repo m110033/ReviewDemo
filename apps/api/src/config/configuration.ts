@@ -1,5 +1,5 @@
 export default () => ({
-  port: parseInt(process.env.PORT, 10) || 4000,
+  port: parseInt(process.env.BACKEND_PORT, 10) || 4000,
   database: {
     uri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/performance-review',
   },
