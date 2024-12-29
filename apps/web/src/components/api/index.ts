@@ -52,7 +52,7 @@ export interface CreateFeedback {
 }
 
 // Axios configuration
-axios.defaults.baseURL = "http://localhost:3001/api/v1";
+axios.defaults.baseURL = `${process.env.API_URL}/api/v1`;
 let accessToken: string | null = null;
 
 const setAccessToken = (token: string) => {
