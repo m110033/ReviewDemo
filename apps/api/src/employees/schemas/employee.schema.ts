@@ -18,7 +18,7 @@ export class Employees extends Document {
     enum: EmployeeRoleEnum,
     default: EmployeeRoleEnum.EMPLOYEE,
   })
-  role: EmployeeRoleEnum;
+  role: string;
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employees);

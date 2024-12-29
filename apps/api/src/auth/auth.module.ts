@@ -8,14 +8,20 @@ import { JwtStrategy } from './jwt.strategy';
 import { EmployeesModule } from 'src/employees/employees.module';
 import { LocalStrategy } from './local.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     EmployeesModule,
     PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1d' },
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '1d',
+        },
+      }),
     }),
   ],
   providers: [
