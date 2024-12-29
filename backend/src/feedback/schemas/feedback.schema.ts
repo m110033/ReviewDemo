@@ -8,7 +8,11 @@ export class Feedback extends mongoose.Document {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Review', required: true })
   reviewId: Review;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Employees', required: true })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Employees',
+    required: true,
+  })
   participant: Employees;
 
   @Prop({ required: true, trim: true })

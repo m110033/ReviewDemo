@@ -19,11 +19,15 @@ import { ErrorCode } from 'src/common/enums/error-code.enum';
 import { Types } from 'mongoose';
 import { EmployeeObject } from 'src/common/decorators/employee.decorator';
 import { Employees } from './schemas/employee.schema';
+import { ReviewsService } from 'src/reviews/reviews.service';
 
 @Controller('employees')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class EmployeesController {
-  constructor(private readonly employeesService: EmployeesService) {}
+  constructor(
+    private readonly employeesService: EmployeesService,
+    private readonly reviewsService: ReviewsService,
+  ) {}
 
   @Post()
   @Roles(EmployeeRoleEnum.ADMIN)
@@ -56,7 +60,7 @@ export class EmployeesController {
   }
 
   @Patch(':id')
-  @Roles(EmployeeRoleEnum.ADMIN)
+  @Roles(EmployeeRoleEnum.ADMIN, EmployeeRoleEnum.EMPLOYEE)
   async update(
     @Param('id') id: string,
     @Body() UpdateEmployeeDto: Partial<CreateEmployeeDto>,
@@ -67,6 +71,15 @@ export class EmployeesController {
   @Delete(':id')
   @Roles(EmployeeRoleEnum.ADMIN)
   async delete(@Param('id') id: string) {
+    const existReviews = await this.reviewsService.findAllForDelete(
+      new Types.ObjectId(id),
+    );
+    if (existReviews.length > 0) {
+      throw new ValidationException({
+        message: 'Cannot delete employee because it has review list',
+        code: ErrorCode.OBJECT_EXISTS,
+      });
+    }
     return this.employeesService.remove(id);
   }
 }

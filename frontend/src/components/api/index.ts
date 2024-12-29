@@ -32,6 +32,23 @@ export interface CreateReview {
   description: string;
   targetEmployee: string;
   participants: string[];
+  feedbacks?: {
+    _id: string;
+    reviewId: string;
+    participant: string;
+    content: string;
+  }[];
+}
+
+export interface Feedback {
+  reviewId: string;
+  content: string;
+  participant: string;
+}
+
+export interface CreateFeedback {
+  reviewId: string;
+  content: string;
 }
 
 // Axios configuration
@@ -168,6 +185,18 @@ export const createReview = async (params: CreateReview): Promise<Review> => {
   }
 };
 
+// Fetch a reviews
+export const getReview = async (id: string): Promise<CreateReview> => {
+  try {
+    await checkAndRefreshToken();
+    const response = await axios.get<CreateReview>(`/reviews/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    throw error;
+  }
+};
+
 // Fetch all reviews
 export const getReviews = async (): Promise<Review[]> => {
   try {
@@ -187,6 +216,30 @@ export const deleteReview = async (id: string): Promise<void> => {
     await axios.delete(`/reviews/${id}`);
   } catch (error) {
     console.error(`Error deleting review with id ${id}:`, error);
+    throw error;
+  }
+};
+
+// Update an review
+export const updateReview = async (id: string, params: Partial<CreateReview>): Promise<Review> => {
+  try {
+    await checkAndRefreshToken();
+    const response = await axios.patch<Review>(`/Reviews/${id}`, params);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating review with id ${id}:`, error);
+    throw error;
+  }
+};
+
+// Create a feedback
+export const createFeedback = async (id: string, params: CreateFeedback): Promise<Feedback> => {
+  try {
+    await checkAndRefreshToken();
+    const response = await axios.post<Feedback>(`/feedbacks`, params);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating review with id ${id}:`, error);
     throw error;
   }
 };

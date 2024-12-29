@@ -58,18 +58,18 @@ export class ReviewsController {
   @Get(':id')
   @Roles(EmployeeRoleEnum.ADMIN, EmployeeRoleEnum.EMPLOYEE) // Both roles can fetch a review
   findOne(@Param('id') id: string) {
-    return this.reviewsService.findOne(id);
+    return this.reviewsService.findOne(new Types.ObjectId(id));
   }
 
   @Patch(':id')
   @Roles(EmployeeRoleEnum.ADMIN) // Only admins can update reviews
   update(@Param('id') id: string, @Body() updateReviewDto: UpdateReviewDto) {
-    return this.reviewsService.update(id, updateReviewDto);
+    return this.reviewsService.update(new Types.ObjectId(id), updateReviewDto);
   }
 
-  @Delete(':id')
-  @Roles(EmployeeRoleEnum.ADMIN) // Only admins can delete reviews
-  remove(@Param('id') id: string) {
-    return this.reviewsService.remove(id);
-  }
+  // @Delete(':id')
+  // @Roles(EmployeeRoleEnum.ADMIN) // Only admins can delete reviews
+  // remove(@Param('id') id: string) {
+  //   return this.reviewsService.remove(id);
+  // }
 }

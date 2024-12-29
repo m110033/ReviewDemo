@@ -51,7 +51,21 @@ export class ReviewsService {
   async findAllForAdmin(): Promise<Review[]> {
     const items = await this.reviewModel
       .find()
-      .select('title description targetEmployee participants');
+      .populate([
+        {
+          path: 'participants',
+          select: 'username',
+        },
+        {
+          path: 'targetEmployee',
+          select: 'username',
+        },
+        {
+          path: 'feedbacks',
+          select: 'reviewId participant content',
+        },
+      ])
+      .select('title description targetEmployee participants feedbacks');
     return items as Review[];
   }
 
@@ -76,16 +90,47 @@ export class ReviewsService {
     return items as Review[];
   }
 
-  async findOne(id: string): Promise<Review> {
+  async findAllForDelete(id: Types.ObjectId): Promise<Review[]> {
+    const items = await this.reviewModel
+      .find({ $or: [{ participants: { $in: [id] } }, { targetEmployee: id }] })
+      .select('title description targetEmployee participants');
+    return items as Review[];
+  }
+
+  async findOne(id: Types.ObjectId): Promise<Review> {
     const item = await this.reviewModel
       .findById(id)
-      .select('title description targetEmployee participants');
+      .populate('feedbacks')
+      .select('title description targetEmployee participants feedbacks')
+      .lean()
+      .exec();
     return item as Review;
   }
 
-  async update(id: string, dto: UpdateReviewDto): Promise<Review> {
+  async findOneByParticipant(
+    id: Types.ObjectId,
+    participant: Types.ObjectId,
+  ): Promise<Review> {
+    const item = await this.reviewModel
+      .findOne({ _id: id, participants: { $in: [participant] } })
+      .select('title description targetEmployee participants feedbacks')
+      .lean()
+      .exec();
+    return item as Review;
+  }
+
+  async update(id: Types.ObjectId, dto: UpdateReviewDto): Promise<Review> {
     await this.validateDto(dto);
     return this.reviewModel.findByIdAndUpdate(id, dto, { new: true }).exec();
+  }
+
+  async updateFeedbacks(
+    id: Types.ObjectId,
+    feedbacks: Types.ObjectId[],
+  ): Promise<Review> {
+    return this.reviewModel
+      .findByIdAndUpdate(id, { feedbacks }, { new: true })
+      .exec();
   }
 
   remove(id: string): Promise<Review> {

@@ -36,8 +36,10 @@ export class EmployeesService {
   }
 
   async create(dto: CreateEmployeeDto): Promise<Employees> {
-    if (dto.password) {
+    if (dto.password && dto.password !== '') {
       dto.password = await this.encryptPassword(dto.password);
+    } else {
+      delete dto.password;
     }
     const model = new this.employeeModel(dto);
     return model.save();
@@ -79,6 +81,9 @@ export class EmployeesService {
 
   async validateEmployee(email: string, password: string): Promise<any> {
     const employee = await this.findOneByEmail(email);
+    if (!employee) {
+      return null;
+    }
     const isValied = await bcrypt.compare(password, employee.password);
     if (!!employee && isValied) {
       const { password, ...result } = employee;
@@ -88,8 +93,10 @@ export class EmployeesService {
   }
 
   async update(id: string, dto: UpdateEmployeeDto): Promise<Employees> {
-    if (dto.password) {
+    if (dto.password && dto.password !== '') {
       dto.password = await this.encryptPassword(dto.password);
+    } else {
+      delete dto.password;
     }
     return await this.employeeModel
       .findByIdAndUpdate(id, dto, { new: true })

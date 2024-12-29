@@ -3,21 +3,35 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { createReview, Employee, getEmployees } from "@/components/api";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Employee, getEmployees, getReview, Review, updateReview } from "@/components/api";
 
 interface Option {
   value: string;
   text: string;
+  username: string;
   selected: boolean;
   element?: HTMLElement;
 }
 
-const CreateReviewPage = () => {
+interface FeedbackOption {
+  id: string;
+  username: string;
+  email: string;
+  content: string;
+}
+
+const UpdateReviewPage = () => {
   const router = useRouter();
 
   const reviewerId = 'participants';
 
+  const searchParams = useSearchParams(); // Get query params
+
+  const reviewId = searchParams.get("id") || ''; // Extract `id` parameter
+  
+  const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+  
   // Form state
   const [formData, setFormData] = useState({
     title: "",
@@ -29,35 +43,76 @@ const CreateReviewPage = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false); // Tracks submission status
   const [error, setError] = useState(""); // Tracks any error during submission
-
-  const [reviewers, setReviewers] = useState<Option[]>([]);
-  const [selectedReviewers, setSelectedReviewers] = useState<{ id: string, email: string }[]>([]);
-
   const [isOptionSelected, setIsOptionSelected] = useState<boolean>(false); // Whether an option is selected
-  
   const [show, setShow] = useState(false);
+
   const dropdownRef = useRef<any>(null);
   const trigger = useRef<any>(null);
+  const reviewersRef = useRef<Option[]>([]);
+  const feedbacksRef = useRef<FeedbackOption[]>([]);
+  const selectedReviewersRef = useRef<{ id: string, email: string }[]>([]);
 
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const fetchData = async () => {
       try {
-        const response = await getEmployees();
-        setEmployees(response);
-        const items = response.map((reviewer) => ({
+        // Fetch employees first
+        const employees = await getEmployees();
+        setEmployees(employees);
+        reviewersRef.current = employees.map((reviewer) => ({
           value: reviewer._id || '',
           text: reviewer.email,
+          username: reviewer.username,
           selected: false,
         }));
-        setReviewers(items);
+        
+        // Then fetch review and pre-select reviewers
+        const review = await getReview(reviewId);
+        
+        setFormData((prev) => ({
+          ...prev,
+          title: review.title,
+          description: review.description,
+          targetEmployee: review.targetEmployee,
+          participants: review.participants,
+        }));
+  
+        // Pre-select participants
+        review.participants.forEach((participantId) => {
+          const reviewer = reviewersRef.current.find((i) => i.value === participantId);
+          if (reviewer) reviewer.selected = true; // Mark reviewer as selected
+        });
+  
+        selectedReviewersRef.current = review.participants.map((participantId) => {
+          const reviewer = reviewersRef.current.find((i) => i.value === participantId);
+          return { id: reviewer?.value || '', email: reviewer?.text || '' };
+        });
+
+        feedbacksRef.current = review?.feedbacks?.map((feedback) => {
+          const reviewer = reviewersRef.current.find((i) => i.value === feedback.participant);
+          return {
+            id: reviewer?.value || '',
+            username: reviewer?.username || '',
+            email: reviewer?.text || '',
+            content: feedback.content,
+          };
+        })?.sort((a, b) => {
+          if (a.email === userInfo.email) return -1;
+          if (b.email === userInfo.email) return 1;
+          return 0;
+        }) || [];
+  
+        setFormData((prev) => ({
+          ...prev,
+          participants: selectedReviewersRef.current.map((i) => i.id),
+        }));
       } catch (err) {
-        console.error("Error fetching employees:", err);
+        console.error("Error fetching data:", err);
       }
     };
-
-    fetchEmployees();
+  
+    fetchData();
   }, []);
-
+  
   const open = () => {
     setShow(true);
   };
@@ -66,21 +121,20 @@ const CreateReviewPage = () => {
     return show === true;
   };
 
-  const select = (id: string, event: React.MouseEvent) => {
-    const item = reviewers.find((i) => i.value === id);
+  const select = (id: string) => {
+    const item = reviewersRef.current.find((i) => i.value === id);
     if (!item) return;
 
-    let newSelectedReviewers = selectedReviewers;
+    let newSelectedReviewers = selectedReviewersRef.current;
     if (!item.selected) {
       item.selected = true;
-      item.element = event.currentTarget as HTMLElement;
-      newSelectedReviewers = [...selectedReviewers, { id: item.value, email: item.text }];
+      newSelectedReviewers = [...selectedReviewersRef.current, { id: item.value, email: item.text }];
     } else {
       item.selected = false;
-      newSelectedReviewers = selectedReviewers.filter((i) => i.id !== id);
+      newSelectedReviewers = selectedReviewersRef.current.filter((i) => i.id !== id);
     }
 
-    setSelectedReviewers(newSelectedReviewers);
+    selectedReviewersRef.current = newSelectedReviewers;
 
     setFormData((prev) => ({
       ...prev,
@@ -89,18 +143,18 @@ const CreateReviewPage = () => {
   };
   
   const remove = (id: string) => {
-    const item = reviewers.find((i) => i.value === id);
+    const item = reviewersRef.current.find((i) => i.value === id);
     if (!item) return;
     item.selected = false;
-    setSelectedReviewers(selectedReviewers.filter((i) => i.id !== id));
+    selectedReviewersRef.current = selectedReviewersRef.current.filter((i) => i.id !== id);
     setFormData((prev) => ({
       ...prev,
-      participants: selectedReviewers.map((i) => i.id),
+      participants: selectedReviewersRef.current.map((i) => i.id),
     }));
   };
   
   const selectedValues = () => {
-    return selectedReviewers.map((i) => i.email);
+    return selectedReviewersRef.current.map((i) => i.email);
   };
 
   // Handles changes to input fields
@@ -139,11 +193,11 @@ const CreateReviewPage = () => {
     setError(""); // Clear any previous error
 
     try {
-      await createReview(formData); // Call API to create an review
+      await updateReview(reviewId, formData); // Call API to update an review
       router.push("/reviews"); // Redirect to review list upon success
     } catch (err) {
-      console.error("Error creating review:", err);
-      setError("Failed to create review. Please try again."); // Set error message
+      console.error("Error updating review:", err);
+      setError("Failed to update review. Please try again."); // Set error message
     } finally {
       setIsSubmitting(false); // Reset submission status
     }
@@ -151,7 +205,7 @@ const CreateReviewPage = () => {
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Create Review" />
+      <Breadcrumb pageName="Edit Review" />
       <div className="flex flex-col gap-10">
         {/* Review Form */}
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -163,7 +217,7 @@ const CreateReviewPage = () => {
               {/* Title Field */}
               <div className="mb-4.5">
                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Title <span className="text-meta-1">*</span>
+                  Title
                 </label>
                 <input
                   type="text"
@@ -179,11 +233,12 @@ const CreateReviewPage = () => {
               {/* Description Field */}
               <div className="mb-4.5">
                 <label className="mb-3 block text-sm font-medium text-black dark:text-white">
-                  Description <span className="text-meta-1">*</span>
+                  Description
                 </label>
                 <input
                   type="text"
                   name="description"
+                  value={formData.description}
                   onChange={handleInputChange}
                   placeholder="Enter description"
                   className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -193,7 +248,7 @@ const CreateReviewPage = () => {
               {/* Reviewee  Dropdown */}
               <div className="mb-4.5">
                 <label className="mb-2.5 block text-black dark:text-white">
-                  Reviewee <span className="text-meta-1">*</span>
+                  Reviewee
                 </label>
                 <div className="relative z-20 bg-transparent dark:bg-form-input">
                   <select
@@ -229,7 +284,7 @@ const CreateReviewPage = () => {
                     name="participants"
                     multiple
                   >
-                    {reviewers.map((reviewer) => (
+                    {reviewersRef.current.map((reviewer) => (
                       <option key={reviewer.value} value={reviewer.text}>
                         {reviewer.text}
                       </option>
@@ -243,7 +298,7 @@ const CreateReviewPage = () => {
                         <div ref={trigger} onClick={open} className="w-full">
                           <div className="mb-2 flex rounded border border-stroke py-2 pl-3 pr-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input">
                             <div className="flex flex-auto flex-wrap gap-3">
-                              {selectedReviewers.map(({ id, email }) => (
+                              {selectedReviewersRef.current.map(({ id, email }) => (
                                 <div
                                   key={id}
                                   className="my-1.5 flex items-center justify-center rounded border-[.5px] border-stroke bg-gray px-2.5 py-1.5 text-sm font-medium dark:border-strokedark dark:bg-white/30"
@@ -276,7 +331,7 @@ const CreateReviewPage = () => {
                                   </div>
                                 </div>
                               ))}
-                              {selectedReviewers.length === 0 && (
+                              {selectedReviewersRef.current.length === 0 && (
                                 <div className="flex-1">
                                   <input
                                     placeholder="Select an option"
@@ -322,11 +377,11 @@ const CreateReviewPage = () => {
                             onBlur={() => setShow(false)}
                           >
                             <div className="flex w-full flex-col">
-                              {reviewers.map((option, index) => (
+                              {reviewersRef.current.map((option, index) => (
                                 <div key={index}>
                                   <div
                                     className="w-full cursor-pointer rounded-t border-b border-stroke hover:bg-primary/5 dark:border-form-strokedark"
-                                    onClick={(event) => select(option.value, event)}
+                                    onClick={(event) => select(option.value)}
                                   >
                                     <div
                                       className={`relative flex w-full items-center border-l-2 border-transparent p-2 pl-2 ${
@@ -351,6 +406,23 @@ const CreateReviewPage = () => {
                 </div>
               </div>
 
+              {/* Feedback Field */}
+              <div className="mb-4.5">
+                <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+                  Feedbacks
+                </label>
+                <div className="relative bg-slate-50 rounded-xl overflow-auto">
+                  {feedbacksRef.current.map((feedback, index) => (
+                      <div key={index} className="px-4 sm:px-0 mt-1.5 mb-2.5">
+                        <div className="grid gap-4 mx-auto max-w-xl bg-white shadow-xl p-8 text-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                          <h3 className="text-balance text-l dark:text-white font-semibold text-slate-900">{`${feedback.username} (${feedback.email})`}</h3>
+                          <p className="text-sm/6">{feedback.content}</p>
+                        </div>
+                      </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Submit Button */}
               <button
                 type="submit"
@@ -370,4 +442,4 @@ const CreateReviewPage = () => {
   );
 };
 
-export default CreateReviewPage;
+export default UpdateReviewPage;

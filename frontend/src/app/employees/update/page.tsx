@@ -33,7 +33,7 @@ const EditEmployeePage = () => {
   const [isOptionSelected, setIsOptionSelected] = useState<boolean>(false); // Whether an option is selected
 
   useEffect(() => {
-    const fetchEmployees = async () => {
+    const fetchEmployee = async () => {
       try {
         await checkAndRefreshToken(); // Check token before making API calls
         const response = await getEmployee(employeeId);
@@ -51,7 +51,7 @@ const EditEmployeePage = () => {
       }
     };
 
-    fetchEmployees();
+    fetchEmployee();
   }, []);
   
   // Handles changes to input fields
@@ -92,7 +92,7 @@ const EditEmployeePage = () => {
 
   return (
     <DefaultLayout>
-      <Breadcrumb pageName="Create Employee" />
+      <Breadcrumb pageName="Edit Employee" />
       <div className="flex flex-col gap-10">
         {/* Employee Form */}
         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -113,7 +113,6 @@ const EditEmployeePage = () => {
                   onChange={handleInputChange}
                   defaultValue={employee?.email}
                   className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  required
                 />
               </div>
 
@@ -129,7 +128,6 @@ const EditEmployeePage = () => {
                   onChange={handleInputChange}
                   defaultValue={employee?.username}
                   className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  required
                 />
               </div>
 
@@ -145,7 +143,6 @@ const EditEmployeePage = () => {
                   onChange={handleInputChange}
                   placeholder="Enter password"
                   className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  required
                 />
               </div>
 
@@ -163,7 +160,6 @@ const EditEmployeePage = () => {
                     className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent px-5 py-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary ${
                       isOptionSelected ? "text-black dark:text-white" : ""
                     }`}
-                    required
                   >
                     <option value="" disabled>
                       Select your role

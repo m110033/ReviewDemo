@@ -38,7 +38,13 @@ export class FeedbackController {
     @EmployeeObject() employee: Employees,
     @Body() dto: CreateFeedbackDto,
   ) {
-    const review = await this.reviewService.findOne(dto.reviewId);
+    const object = await this.employeesService.findOneByEmail(employee.email);
+
+    const review = await this.reviewService.findOneByParticipant(
+      dto.reviewId,
+      object._id as Types.ObjectId,
+    );
+
     if (!review) {
       throw new ValidationException({
         message: `Review with ID ${dto.reviewId} not found`,
@@ -46,9 +52,10 @@ export class FeedbackController {
       });
     }
 
-    const object = await this.employeesService.findOneByEmail(employee.email);
-
-    const feedback = await this.feedbackService.create(dto, object.id);
+    const feedback = await this.feedbackService.create(
+      dto,
+      object._id as Types.ObjectId,
+    );
 
     return feedback;
   }

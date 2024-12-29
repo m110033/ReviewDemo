@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react";
 import { getReviews, deleteReview, Review } from "../api";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const TableReviews: React.FC = () => {
+  const router = useRouter();
+  
   const [reviews, setReviews] = useState<Review[]>([]);
 
   const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
@@ -13,7 +16,7 @@ const TableReviews: React.FC = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const reviewList = await getReviews(); // getReviews 会自动检查 token
+        const reviewList = await getReviews();
         setReviews(reviewList);
       } catch (error) {
         console.error("Error fetching reviews:", error);
@@ -66,8 +69,10 @@ const TableReviews: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {reviews.map((review) => (
-              <tr key={review._id}>
+            {reviews.map((review) => {
+              const canGiveFeedback = review.participants.find((i) => i._id === userInfo._id);
+              return (
+                <tr key={review._id}>
                 <td className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
                   <h5 className="font-medium text-black dark:text-white">
                     {review.title}
@@ -89,23 +94,38 @@ const TableReviews: React.FC = () => {
                 <td className="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
                   <div className="flex items-center space-x-3.5">
                     <button
-                      onClick={() => alert(`Edit review: ${review._id}`)}
+                      onClick={() => router.push(`/reviews/view?id=${review._id}`)}
                       className="hover:text-primary"
                     >
-                      Feedback
+                      View
                     </button>
-                    {userInfo.role === "admin" && (
+                    <button
+                      onClick={() => router.push(`/reviews/update?id=${review._id}`)}
+                      className="hover:text-primary"
+                    >
+                      Edit
+                    </button>
+                    {canGiveFeedback && (
+                      <button
+                        onClick={() => router.push(`/reviews/feedback?id=${review._id}`)}
+                        className="hover:text-primary"
+                      >
+                        Feedback
+                      </button>
+                    )}
+                    {/* {userInfo.role === "admin" && (
                       <button
                       onClick={() => handleDelete(review._id)}
                       className="hover:text-primary"
                     >
                       Delete
                     </button>
-                    )}
+                    )} */}
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

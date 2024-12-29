@@ -17,23 +17,31 @@ export class FeedbackService {
     dto: CreateFeedbackDto,
     participant: Types.ObjectId,
   ): Promise<Feedback> {
-    const review = await this.reviewsService.findOne(dto.reviewId);
-    const feedback = new this.feedbackModel({
+    const temp = await this.findAllByReviewId(dto.reviewId);
+    const feedbacks = temp.map((i) => i._id as Types.ObjectId);
+    const model = new this.feedbackModel({
       reviewId: dto.reviewId,
       content: dto.content,
       participant,
     });
-    if (typeof review.feedbacks === 'undefined') {
-      review.feedbacks = [];
-    }
-    review.feedbacks.push(feedback);
-    review.save();
-    return feedback.save();
+    const feedback = await model.save();
+    feedbacks.push(feedback._id as Types.ObjectId);
+    await this.reviewsService.updateFeedbacks(dto.reviewId, feedbacks);
+    return feedback;
   }
 
   async findAll(participant: Types.ObjectId): Promise<Feedback[]> {
     const items = await this.feedbackModel
       .find({ participant })
+      .select('reviewId participant content')
+      .lean()
+      .exec();
+    return items as Feedback[];
+  }
+
+  async findAllByReviewId(id: Types.ObjectId): Promise<Feedback[]> {
+    const items = await this.feedbackModel
+      .find({ reviewId: id })
       .select('reviewId participant content')
       .lean()
       .exec();
