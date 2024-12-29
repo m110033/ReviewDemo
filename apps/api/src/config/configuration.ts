@@ -7,4 +7,7 @@ export default () => ({
     secret: process.env.JWT_SECRET || 'p2s5v8y/B?E(H+MbQeThWmZq4t7w!z%C',
     expiresIn: '24h',
   },
+  frontend: {
+    url: process.env.FRONTEND_URL || 'http://localhost:3000',
+  }
 });
