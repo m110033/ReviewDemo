@@ -1,0 +1,16 @@
+{
+    "name": "cirrusassignment",
+    "version": "1.0.0",
+    "scripts": {
+      "start": "npm run start:backend",
+      "start:backend": "npm --prefix backend run start:prod",
+      "build": "npm run build:frontend && npm run build:backend",
+      "build:frontend": "npm --prefix frontend run build",
+      "build:backend": "npm --prefix backend run build",
+      "dev": "npm run dev:backend & npm run dev:frontend",
+      "dev:frontend": "npm --prefix frontend run dev",
+      "dev:backend": "npm --prefix backend run start:dev"
+    },
+    "dependencies": {}
+  }
+  
