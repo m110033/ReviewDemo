@@ -53,9 +53,9 @@ export interface CreateFeedback {
 
 const port = process.env.PORT || '4000';
 
-const apiUrl = process.env.API_URL || `https://cirrusassignment.railway.internal:${port}`;
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || `https://cirrusassignment.railway.internal:${port}`;
 
-console.log(`API URL: ${process.env.API_URL}`);
+console.log(`API URL: ${process.env.NEXT_PUBLIC_API_URL}`);
 
 // Axios configuration
 axios.defaults.baseURL = `${apiUrl}/api/v1`;
