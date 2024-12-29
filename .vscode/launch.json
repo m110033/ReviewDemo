@@ -18,8 +18,8 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": ["run", "start:debug"],
             "sourceMaps": true,
-            "envFile": "${workspaceFolder}/backend/.env",
-            "cwd": "${workspaceFolder}/backend",
+            "envFile": "${workspaceFolder}/apps/api/.env",
+            "cwd": "${workspaceFolder}/apps/api",
             "console": "integratedTerminal"
         }
     ]
