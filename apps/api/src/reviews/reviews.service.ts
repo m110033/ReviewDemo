@@ -71,7 +71,7 @@ export class ReviewsService {
 
   async findAllForEmployee(id: Types.ObjectId): Promise<Review[]> {
     const items = await this.reviewModel
-      .find({ participants: { $in: [id] } })
+      .find({ $or: [{ participants: { $in: [id] } }, { targetEmployee: id }] })
       .populate([
         {
           path: 'participants',

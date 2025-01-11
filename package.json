@@ -22,8 +22,8 @@
     "npm": ">=9.x"
   },
   "workspaces": [
-    "apps/*",
-    "libs/*"
+    "apps/api/*",
+    "apps/web/*"
   ],
   "devDependencies": {
     "prettier": "^3.0.0",
