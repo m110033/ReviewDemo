@@ -112,7 +112,6 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 <td align="center" valign="middle"><a href="https://genuinebee.com/" target="_blank"><img src="https://nestjs.com/img/logos/genuinebee.svg" width="97" valign="middle" /></a></td>
 </tr>
 <tr>
-<td align="center" valign="middle"><a href="https://vpn-review.com/vpn-for-torrenting" target="_blank"><img src="https://nestjs.com/img/logos/vpn-review-logo.png" width="85" valign="middle" /></a></td>
 <td align="center" valign="middle"><a href="https://lambda-it.ch/" target="_blank"><img src="https://nestjs.com/img/logos/lambda-it-logo.svg" width="115" valign="middle" /></a></td>
 <td align="center" valign="middle"><a href="https://rocketech.it/cases/?utm_source=google&utm_medium=badge&utm_campaign=nestjs" target="_blank"><img src="https://nestjs.com/img/logos/rocketech-logo.svg" width="110" valign="middle" /></a></td>
 <td align="center" valign="middle"><a href="https://www.anonymistic.com/" target="_blank"><img src="https://nestjs.com/img/logos/anonymistic-logo.png" width="125" valign="middle" /></a></td>
