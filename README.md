@@ -21,7 +21,7 @@
     # Backend
     BACKEND_PORT="4000"
     FRONTEND_URL="http://localhost:3000"
-    MONGODB_URI="mongodb://127.0.0.1:27017/performance-review"
+    MONGO_URL="mongodb://127.0.0.1:27017/performance-review"
     JWT_SECRET="abcd1234"
     NODE_OPTIONS="--max-old-space-size=8192"
     ```
