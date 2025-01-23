@@ -9,7 +9,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  
+
   app.enableCors({
     origin: configService.get<string>('frontend.url'),
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -19,7 +19,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
   const httpAdapter = app.get(HttpAdapterHost);
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
-  
+
   const port = configService.get<number>('port', 4000);
   await app.listen(port);
 

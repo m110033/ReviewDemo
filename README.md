@@ -8,8 +8,8 @@
 ## Environment Setup
 1. Clone the repository
     ```bash
-    git clone https://github.com/m110033/cirrusAssignment.git
-    cd cirrusAssignment
+    git clone https://github.com/m110033/ReviewDemo.git
+    cd ReviewDemo
     ```
 
 2. Create `.env` file in root directory with following content:
